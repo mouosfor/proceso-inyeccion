@@ -1,0 +1,14 @@
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Worker (se despliega en Cloudflare, no debe estar en el host público)
+worker.js
+
+# Documentación de despliegue interna
+DEPLOY.md
