@@ -24,6 +24,8 @@
     .no-print { display: none !important; }
     body, #root { background: #fff !important; background-image: none !important; }
     body::before { display: none !important; }
+    #print-report-container { display: block !important; }
+    #print-report-container > div { max-width: none !important; }
   }
 </style>
 </head>
@@ -36,12 +38,14 @@
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 </script>
-<script src="data.js?v=20"></script>
-<script src="calc.js?v=20"></script>
-<script type="text/babel" src="shared.jsx?v=20"></script>
-<script type="text/babel" src="matchmaker-view.jsx?v=20"></script>
-<script type="text/babel" src="cad3d-card.jsx?v=20"></script>
-<script type="text/babel" src="plano-tab.jsx?v=20"></script>
-<script type="text/babel" src="app.jsx?v=20"></script>
+<script src="data.js?v=22"></script>
+<script src="calc.js?v=22"></script>
+<script type="text/babel" src="shared.jsx?v=22"></script>
+<script type="text/babel" src="print-report.jsx?v=22"></script>
+<script type="text/babel" src="dashboard-home.jsx?v=22"></script>
+<script type="text/babel" src="matchmaker-view.jsx?v=22"></script>
+<script type="text/babel" src="cad3d-card.jsx?v=22"></script>
+<script type="text/babel" src="plano-tab.jsx?v=22"></script>
+<script type="text/babel" src="app.jsx?v=22"></script>
 </body>
 </html>

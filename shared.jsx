@@ -72,6 +72,13 @@ function useProcesoState() {
   const [largoPieza2, setLargoPieza2] = React.useState("");
   const [espesor2, setEspesor2] = React.useState("");
 
+  // Detalles del molde (afectan a la fuerza de cierre)
+  const [superficieColada, setSuperficieColada] = React.useState("");        // mm² del sistema de colada
+  const [coefSeguridad, setCoefSeguridad] = React.useState("1.2");           // típico 1.2
+  const [superficieCorredera, setSuperficieCorredera] = React.useState("");  // mm² por corredera
+  const [nCorrederas, setNCorrederas] = React.useState("");
+  const [anguloCorredera, setAnguloCorredera] = React.useState("20");        // grados
+
   // Helper: tiempo de refrigeración (segundos) para un material y espesor (mm).
   // Fórmula del CSV: t = (s²/(π²·α)) · ln((4/π)·(T1-T2)/(T'2-T2)),  α = K/(ρ·Cp).
   const computeTRefrig = (m, espesorMm) => {
@@ -129,13 +136,43 @@ function useProcesoState() {
   const volumenN = is2K ? c1.volumenN + c2.volumenN : c1.volumenN;
   // En 2K, el molde sigue teniendo c1.nCavN cavidades (las dos componentes comparten cavidades)
   const nCavN = c1.nCavN;
-  const areaPieza = is2K
+
+  // Inputs adicionales para fuerza de cierre (Excel "FUERZA DE CIERRE")
+  const supColadaMm2 = parseFloat(superficieColada) || 0;
+  const coefSegN = parseFloat(coefSeguridad) || 1.2;
+  const supCorrMm2 = parseFloat(superficieCorredera) || 0;
+  const nCorrN = parseFloat(nCorrederas) || 0;
+  const anguloN = parseFloat(anguloCorredera) || 0;
+
+  // Áreas proyectadas (en cm²) — pieza solamente, sin colada
+  const areaPiezaSolo = is2K
     ? ((c1.areaPieza || 0) + (c2.areaPieza || 0)) || null
     : c1.areaPieza;
-  // En 2K la fuerza de cierre es la suma de cada componente (ambos empujan a la vez)
-  const fuerzaCierre = is2K
-    ? (c1.fuerzaCierre || 0) + (c2.fuerzaCierre || 0) || null
-    : c1.fuerzaCierre;
+  // Área total proyectada (incluye colada) en cm²
+  const areaPieza = areaPiezaSolo != null
+    ? areaPiezaSolo + supColadaMm2 / 100
+    : (supColadaMm2 > 0 ? supColadaMm2 / 100 : null);
+
+  // Presión específica representativa (la del peor caso = mayor)
+  const presionMaxima = is2K
+    ? Math.max(c1.presionEspecifica || 0, c2.presionEspecifica || 0)
+    : (c1.presionEspecifica || 0);
+
+  // Fuerza de cierre piezas — fórmula del Excel:
+  //   F (Tm) = ((Sup_pieza_total + Sup_colada) / 100) × P × coef / 1000
+  // En 2K cada componente lleva su propia presión específica → calculamos por separado y sumamos
+  const fuerzaPieza = is2K
+    ? (((c1.areaPieza || 0) * (c1.presionEspecifica || 0)) + ((c2.areaPieza || 0) * (c2.presionEspecifica || 0))) * coefSegN / 1000
+    : ((c1.areaPieza || 0) * (c1.presionEspecifica || 0)) * coefSegN / 1000;
+  // La colada usa la presión más alta (caso peor)
+  const fuerzaColada = supColadaMm2 > 0 && presionMaxima > 0
+    ? (supColadaMm2 / 100) * presionMaxima * coefSegN / 1000
+    : 0;
+  // Correderas con cierre por plano inclinado
+  const fuerzaCorrederas = supCorrMm2 > 0 && nCorrN > 0 && presionMaxima > 0
+    ? (supCorrMm2 / 100) * nCorrN * Math.sin(anguloN * Math.PI / 180) * presionMaxima * coefSegN / 1000
+    : 0;
+  const fuerzaCierre = (fuerzaPieza + fuerzaColada + fuerzaCorrederas) || null;
   // Densidad efectiva: ponderada por volumen
   const densidad = is2K && volumenN > 0
     ? (c1.volumenN * c1.densidad + c2.volumenN * c2.densidad) / volumenN
@@ -200,6 +237,14 @@ function useProcesoState() {
     volumen2, setVolumen2, pesoInyectada2, setPesoInyectada2,
     anchoPieza2, setAnchoPieza2, largoPieza2, setLargoPieza2,
     espesor2, setEspesor2,
+    // Detalles del molde
+    superficieColada, setSuperficieColada,
+    coefSeguridad, setCoefSeguridad,
+    superficieCorredera, setSuperficieCorredera,
+    nCorrederas, setNCorrederas,
+    anguloCorredera, setAnguloCorredera,
+    // Desglose de fuerza
+    fuerzaPieza, fuerzaColada, fuerzaCorrederas,
     // Datos derivados por componente
     c1, c2,
     // Combinados
