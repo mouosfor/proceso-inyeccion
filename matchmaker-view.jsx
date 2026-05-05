@@ -251,7 +251,10 @@ function Sidebar({ s, kFilter, setKFilter }) {
         </div>
 
         <button onClick={() => {
-          window.__printData = { s: { ...s }, top: top };
+          if (!s.pesoInyectadaN || s.pesoInyectadaN <= 0) {
+            alert("Introduce primero los datos de la pieza (volumen, ancho, largo, cavidades) para generar el informe.");
+            return;
+          }
           window.print();
         }} style={{
           padding: "10px", width: "100%", background: "linear-gradient(135deg, #059669, #10b981)",

@@ -294,29 +294,62 @@ function PrintReport({ s, top }) {
             </div>
           </div>
 
-          {/* Key metrics */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, marginTop: 10 }}>
-            <MetricBox label="Utilización" value={fmtPct(r.porcentajeUtilizacion)} />
-            <MetricBox label="Permanencia" value={`${fmt(r.tiempoPermanencia, 1)} min`} />
-            <MetricBox label="L/D" value={fmt(r.ratioLD)} />
-            <MetricBox label="Dosis real" value={`${fmt(r.cm3DosisReal)} cm³`} />
-            <MetricBox label="F.cierre" value={fmtPct(r.relacionTonelaje)} />
-          </div>
-
-          {/* Extra details if 2K */}
-          {is2K && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 }}>
-              <div style={{ background: "#f8fafc", borderRadius: 8, padding: "10px 12px" }}>
-                <div style={{ fontSize: 9, color: "#059669", fontWeight: 700, textTransform: "uppercase" }}>Husillo principal</div>
-                <div style={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace", color: "#0f172a", marginTop: 2 }}>Ø{m.diametroHusillo} mm · {m.dosisMaxHusillo} mm carrera</div>
+          {/* Key metrics: 1K → directos · 2K → P/S por husillo */}
+          {is2K ? (
+            <div style={{ marginTop: 10 }}>
+              <Husillo2KRow res={r.resPrincipal} title={`Husillo principal · Ø${m.diametroHusillo}`} sub={`carrera máx ${m.dosisMaxHusillo} mm`} accent="#059669" />
+              <div style={{ height: 6 }} />
+              <Husillo2KRow res={r.resSecundario} title={`Husillo secundario · Ø${m.diametroHusilloSecundario}`} sub={`carrera máx ${m.dosisMaxHusilloSecundario} mm`} accent="#0891b2" />
+              <div style={{ marginTop: 8, padding: "8px 12px", background: "#f0fdf4", borderRadius: 8, border: "1px solid #bbf7d0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#059669", textTransform: "uppercase" }}>F. cierre / Tonelaje · combinada</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>
+                  {r.fuerzaCierreNecesaria != null ? r.fuerzaCierreNecesaria.toFixed(0) : "—"} t / {m.tonelaje} t
+                  <span style={{ marginLeft: 6, color: "#059669" }}>({fmtPct(r.relacionTonelaje)})</span>
+                </div>
               </div>
-              <div style={{ background: "#f8fafc", borderRadius: 8, padding: "10px 12px" }}>
-                <div style={{ fontSize: 9, color: "#059669", fontWeight: 700, textTransform: "uppercase" }}>Husillo secundario</div>
-                <div style={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace", color: "#0f172a", marginTop: 2 }}>Ø{m.diametroHusilloSecundario} mm · {m.dosisMaxHusilloSecundario} mm carrera</div>
-              </div>
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, marginTop: 10 }}>
+              <MetricBox label="Utilización" value={fmtPct(r.porcentajeUtilizacion)} />
+              <MetricBox label="Permanencia" value={`${fmt(r.tiempoPermanencia, 1)} min`} />
+              <MetricBox label="L/D" value={fmt(r.ratioLD)} />
+              <MetricBox label="Dosis real" value={`${fmt(r.cm3DosisReal)} cm³`} />
+              <MetricBox label="F.cierre" value={fmtPct(r.relacionTonelaje)} />
             </div>
           )}
         </div>
+
+        {/* ─── REFRIGERACIÓN Y CICLO ─── */}
+        {(s.tCicloEstimado != null && s.tCicloEstimado > 0) && (
+          <div style={{ marginTop: 14, background: "#eef2ff", borderRadius: 8, padding: "10px 14px", border: "1px solid #c7d2fe" }}>
+            <div style={{ fontSize: 9, fontWeight: 700, color: "#4f46e5", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 6 }}>
+              Refrigeración y ciclo
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: is2K ? "1fr 1fr 1fr" : "1fr 1fr", gap: 10, fontSize: 10 }}>
+              {is2K ? (
+                <>
+                  <div>
+                    <div style={{ color: "#64748b" }}>t.refrig {s.materialNombre}</div>
+                    <div style={{ fontFamily: "JetBrains Mono, monospace", color: "#0f172a", fontWeight: 700, fontSize: 12 }}>{s.c1.tiempoRefrigeracion ? `${s.c1.tiempoRefrigeracion.toFixed(1)} s` : "—"}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: "#64748b" }}>t.refrig {s.materialNombre2}</div>
+                    <div style={{ fontFamily: "JetBrains Mono, monospace", color: "#0f172a", fontWeight: 700, fontSize: 12 }}>{s.c2.tiempoRefrigeracion ? `${s.c2.tiempoRefrigeracion.toFixed(1)} s` : "—"}</div>
+                  </div>
+                </>
+              ) : (
+                <div>
+                  <div style={{ color: "#64748b" }}>t.refrigeración</div>
+                  <div style={{ fontFamily: "JetBrains Mono, monospace", color: "#0f172a", fontWeight: 700, fontSize: 12 }}>{s.tRefrigUsado ? `${s.tRefrigUsado.toFixed(1)} s` : "—"}</div>
+                </div>
+              )}
+              <div>
+                <div style={{ color: "#64748b" }}>ciclo estimado</div>
+                <div style={{ fontFamily: "JetBrains Mono, monospace", color: "#4f46e5", fontWeight: 700, fontSize: 12 }}>{s.tCicloEstimado.toFixed(1)} s</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ─── EXPLANATION ─── */}
         <div style={{ marginTop: 16, background: "#f0fdf4", borderRadius: 8, padding: "12px 16px", border: "1px solid #bbf7d0" }}>
@@ -343,6 +376,28 @@ function MetricBox({ label, value }) {
     <div style={{ background: "#f8fafc", borderRadius: 6, padding: "8px 10px", textAlign: "center" }}>
       <div style={{ fontSize: 8, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.3 }}>{label}</div>
       <div style={{ fontSize: 13, fontWeight: 700, fontFamily: "JetBrains Mono, monospace", color: "#0f172a", marginTop: 2 }}>{value}</div>
+    </div>
+  );
+}
+
+// Fila compacta para un husillo en modo 2K
+function Husillo2KRow({ res, title, sub, accent }) {
+  if (!res) return null;
+  return (
+    <div style={{
+      background: "#f8fafc", borderRadius: 8, padding: "10px 12px",
+      borderLeft: `3px solid ${accent}`,
+    }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 6 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: 0.6 }}>{title}</div>
+        <div style={{ fontSize: 8, color: "#94a3b8", fontFamily: "JetBrains Mono, monospace" }}>{sub}</div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+        <MetricBox label="Utilización" value={fmtPct(res.porcentajeUtilizacion)} />
+        <MetricBox label="Permanencia" value={res.tiempoPermanencia != null ? `${fmt(res.tiempoPermanencia, 1)} min` : "—"} />
+        <MetricBox label="L/D" value={fmt(res.ratioLD)} />
+        <MetricBox label="Dosis real" value={res.cm3DosisReal != null ? `${fmt(res.cm3DosisReal)} cm³` : "—"} />
+      </div>
     </div>
   );
 }
