@@ -62,6 +62,7 @@ function useProcesoState() {
   const [anchoPieza, setAnchoPieza] = React.useState("");
   const [largoPieza, setLargoPieza] = React.useState("");
   const [nCavidades, setNCavidades] = React.useState("");
+  const [espesor, setEspesor] = React.useState("");
 
   // Componente 2 (solo se usa en 2K) — cavidades se hereda de componente 1
   const [materialNombre2, setMaterialNombre2] = React.useState("TPE");
@@ -69,9 +70,27 @@ function useProcesoState() {
   const [pesoInyectada2, setPesoInyectada2] = React.useState("");
   const [anchoPieza2, setAnchoPieza2] = React.useState("");
   const [largoPieza2, setLargoPieza2] = React.useState("");
+  const [espesor2, setEspesor2] = React.useState("");
+
+  // Helper: tiempo de refrigeración (segundos) para un material y espesor (mm).
+  // Fórmula del CSV: t = (s²/(π²·α)) · ln((4/π)·(T1-T2)/(T'2-T2)),  α = K/(ρ·Cp).
+  const computeTRefrig = (m, espesorMm) => {
+    if (!m || !(espesorMm > 0)) return null;
+    const Cp = m.calorEspecifico, K = m.conductividadTermica;
+    const T1 = m.tempResina, T2 = m.tempMolde, T2p = m.tempDistorsion;
+    if (!Cp || !K || T1 == null || T2 == null || T2p == null || m.densidad == null) return null;
+    const dT = T1 - T2, dT2 = T2p - T2;
+    if (!(dT > 0) || !(dT2 > 0)) return null;
+    const alpha = K / (m.densidad * Cp);
+    if (!(alpha > 0)) return null;
+    const sCm = espesorMm / 10;
+    const ratio = (4 / Math.PI) * (dT / dT2);
+    if (!(ratio > 0)) return null;
+    return (sCm * sCm / (Math.PI * Math.PI * alpha)) * Math.log(ratio);
+  };
 
   // Helper: deriva los números de un componente
-  const computeComp = (matName, vol, peso, ancho, largo, cav) => {
+  const computeComp = (matName, vol, peso, ancho, largo, cav, espesorMm) => {
     const m = window.MATERIALES.find(x => x.material === matName);
     const dens = m?.densidad ?? 0;
     const tmax = m?.tiempoMax ?? null;
@@ -81,16 +100,26 @@ function useProcesoState() {
     const cavN = parseFloat(cav) || 0;
     const anchoN = parseFloat(ancho) || 0;
     const largoN = parseFloat(largo) || 0;
+    const espN = parseFloat(espesorMm) || 0;
     const area = cavN > 0 ? ((anchoN * largoN) / 100) * cavN : null;
     const fuerza = area != null ? (area * press) / 1000 : null;
+    const tRefrig = computeTRefrig(m, espN);
     return { material: m, densidad: dens, tiempoMaxMaterial: tmax, presionEspecifica: press,
-      volumenN: volN, pesoInyectadaN: pesoN, nCavN: cavN, anchoN, largoN,
-      areaPieza: area, fuerzaCierre: fuerza };
+      volumenN: volN, pesoInyectadaN: pesoN, nCavN: cavN, anchoN, largoN, espesorN: espN,
+      areaPieza: area, fuerzaCierre: fuerza, tiempoRefrigeracion: tRefrig };
   };
 
-  const c1 = computeComp(materialNombre, volumen, pesoInyectada, anchoPieza, largoPieza, nCavidades);
+  const c1 = computeComp(materialNombre, volumen, pesoInyectada, anchoPieza, largoPieza, nCavidades, espesor);
   // Componente 2 hereda nCavidades del componente 1 (mismo molde)
-  const c2 = computeComp(materialNombre2, volumen2, pesoInyectada2, anchoPieza2, largoPieza2, nCavidades);
+  const c2 = computeComp(materialNombre2, volumen2, pesoInyectada2, anchoPieza2, largoPieza2, nCavidades, espesor2);
+
+  // Tiempo de refrigeración relevante: el más alto de los componentes activos
+  // (la pieza no se desmoldea hasta que el material más lento haya enfriado).
+  const tRefrigUsado = tipoInyeccion === "2K"
+    ? Math.max(c1.tiempoRefrigeracion || 0, c2.tiempoRefrigeracion || 0) || null
+    : c1.tiempoRefrigeracion;
+  // Ciclo estimado: la refrigeración suele ocupar ~60% del ciclo
+  const tCicloEstimado = tRefrigUsado != null && tRefrigUsado > 0 ? tRefrigUsado / 0.60 : null;
 
   const tCicloN = parseFloat(tCiclo) || 0;
   const is2K = tipoInyeccion === "2K";
@@ -165,15 +194,19 @@ function useProcesoState() {
     materialNombre, setMaterialNombre,
     volumen, setVolumen, pesoInyectada, setPesoInyectada,
     anchoPieza, setAnchoPieza, largoPieza, setLargoPieza, nCavidades, setNCavidades,
+    espesor, setEspesor,
     // Componente 2 (cavidades hereda del componente 1)
     materialNombre2, setMaterialNombre2,
     volumen2, setVolumen2, pesoInyectada2, setPesoInyectada2,
     anchoPieza2, setAnchoPieza2, largoPieza2, setLargoPieza2,
+    espesor2, setEspesor2,
     // Datos derivados por componente
     c1, c2,
     // Combinados
     material: c1.material, densidad, tiempoMaxMaterial,
     pesoInyectadaN, tCicloN, volumenN, nCavN, areaPieza, fuerzaCierre,
+    // Refrigeración / ciclo estimado
+    tRefrigUsado, tCicloEstimado,
     inyectorasFiltradas, resultados, recomendadaIdx, ctx,
   };
 }

@@ -148,11 +148,36 @@ function MatchmakerView({ s }) {
               </div>
             </Field>
             <div style={{ marginTop: 10 }}>
-              <Field label="Tiempo de ciclo" suffix="segundos">
+              <Field label="Tiempo de ciclo" suffix="segundos" icon="⏱">
                 <div style={{ position: "relative" }}>
                   <input style={inputStyle} type="number" value={s.tCiclo} onChange={e => s.setTCiclo(e.target.value)} placeholder="0" />
                 </div>
               </Field>
+              {s.tCicloEstimado != null && s.tCicloEstimado > 0 && (
+                <div style={{
+                  marginTop: 6,
+                  padding: "8px 10px",
+                  background: "#fff",
+                  border: "1px dashed #c7d2fe",
+                  borderRadius: 8,
+                  fontSize: 11,
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
+                }}>
+                  <span style={{ color: "#475569", fontFamily: "JetBrains Mono, monospace" }}>
+                    💡 estimado <b style={{ color: "#4f46e5" }}>{s.tCicloEstimado.toFixed(1)} s</b>
+                    <span style={{ color: "#94a3b8", marginLeft: 6 }}>· refrig {s.tRefrigUsado.toFixed(1)} s × 1.67</span>
+                  </span>
+                  <button
+                    onClick={() => s.setTCiclo(s.tCicloEstimado.toFixed(1))}
+                    style={{
+                      padding: "4px 10px",
+                      background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+                      color: "#fff", border: "none", borderRadius: 6,
+                      fontSize: 10, fontWeight: 700, cursor: "pointer", letterSpacing: 0.4,
+                      whiteSpace: "nowrap",
+                    }}>USAR ↑</button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -170,6 +195,8 @@ function MatchmakerView({ s }) {
             ancho={s.anchoPieza} setAncho={s.setAnchoPieza}
             largo={s.largoPieza} setLargo={s.setLargoPieza}
             cavidades={s.nCavidades} setCavidades={s.setNCavidades}
+            espesor={s.espesor} setEspesor={s.setEspesor}
+            tRefrig={s.c1.tiempoRefrigeracion}
             densidad={s.c1.densidad} tiempoMax={s.c1.tiempoMaxMaterial}
           />
 
@@ -186,6 +213,8 @@ function MatchmakerView({ s }) {
               largo={s.largoPieza2} setLargo={s.setLargoPieza2}
               cavidades={s.nCavidades}
               cavidadesReadOnly
+              espesor={s.espesor2} setEspesor={s.setEspesor2}
+              tRefrig={s.c2.tiempoRefrigeracion}
               densidad={s.c2.densidad} tiempoMax={s.c2.tiempoMaxMaterial}
             />
           )}
@@ -574,7 +603,7 @@ function DarkStat3({ label, value, status, compact }) {
   );
 }
 
-function ComponenteBlock({ titulo, accent, inputStyle, Field, material, setMaterial, volumen, setVolumen, pesoN, ancho, setAncho, largo, setLargo, cavidades, setCavidades, cavidadesReadOnly, densidad, tiempoMax }) {
+function ComponenteBlock({ titulo, accent, inputStyle, Field, material, setMaterial, volumen, setVolumen, pesoN, ancho, setAncho, largo, setLargo, cavidades, setCavidades, cavidadesReadOnly, espesor, setEspesor, tRefrig, densidad, tiempoMax }) {
   const labeledSelectStyle = {
     ...inputStyle,
     appearance: "none",
@@ -677,6 +706,22 @@ function ComponenteBlock({ titulo, accent, inputStyle, Field, material, setMater
           <input style={inputStyle} type="number" value={cavidades} onChange={e => setCavidades(e.target.value)} placeholder="0" />
         )}
       </Field>
+
+      {/* Espesor pared + tiempo de refrigeración derivado */}
+      <Field label="Espesor pared" suffix="mm" icon="📏">
+        <input style={inputStyle} type="number" value={espesor} onChange={e => setEspesor(e.target.value)} placeholder="0" step="0.1" />
+      </Field>
+      {tRefrig != null && tRefrig > 0 && (
+        <div style={{
+          padding: "8px 10px", background: "#fff", borderRadius: 8,
+          border: `1px dashed ${accent}40`,
+          fontSize: 11, fontFamily: "JetBrains Mono, monospace",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
+          <span style={{ color: "#64748b" }}>❄️ t. refrigeración</span>
+          <b style={{ color: accent }}>{tRefrig.toFixed(1)} s</b>
+        </div>
+      )}
     </div>
   );
 }

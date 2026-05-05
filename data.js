@@ -3,20 +3,29 @@
 
 // presionEspecifica = presión específica de cierre en kg/cm² (valores típicos por familia).
 // Se usa para calcular fuerza de cierre: F (ton) = área proyectada (cm²) × presionEspecifica / 1000
+//
+// Para cálculo de tiempo de refrigeración (CSV "Cálculo Tiempo Refrigeración"):
+//   calorEspecifico Cp en cal·g/°C
+//   conductividadTermica K en cal/(cm·s·°C)
+//   tempResina T1 en °C  (típica de inyección)
+//   tempMolde T2 en °C   (típica del molde)
+//   tempDistorsion T'2 en °C  (HDT, hasta donde tiene que enfriar la pieza para desmoldear)
+//   α = K / (ρ · Cp)
+//   t_refrig = (s²/(π²·α)) · ln( (4/π) · (T1-T2)/(T'2-T2) )
 const MATERIALES = [
-  { material: "ABS", tiempoMax: 6, densidad: 0.92, presionEspecifica: 400 },
-  { material: "PC", tiempoMax: 7, densidad: 1.04, presionEspecifica: 500 },
-  { material: "ABS-PC", tiempoMax: 6, densidad: 1.10, presionEspecifica: 500 },
-  { material: "PMMA", tiempoMax: 8, densidad: 1.19, presionEspecifica: 500 },
-  { material: "PBT", tiempoMax: 2, densidad: 1.07, presionEspecifica: 450 },
-  { material: "PS", tiempoMax: 5, densidad: 0.92, presionEspecifica: 350 },
-  { material: "PP", tiempoMax: 25, densidad: 0.73, presionEspecifica: 300 },
-  { material: "TPE", tiempoMax: 15, densidad: 0.70, presionEspecifica: 250 },
-  { material: "PA6", tiempoMax: 4, densidad: 1.13, presionEspecifica: 600 },
-  { material: "PA6 + FV 30%", tiempoMax: 4, densidad: 1.36, presionEspecifica: 750 },
-  { material: "PA66", tiempoMax: 4, densidad: 1.14, presionEspecifica: 650 },
-  { material: "PA66 + FV 50%", tiempoMax: 4, densidad: 1.57, presionEspecifica: 850 },
-  { material: "PA12", tiempoMax: 13, densidad: 1.01, presionEspecifica: 500 },
+  { material: "ABS",            tiempoMax: 6,  densidad: 0.92, presionEspecifica: 400, calorEspecifico: 0.40, conductividadTermica: 6.25e-4, tempResina: 220, tempMolde: 70, tempDistorsion: 82.5 },
+  { material: "PC",             tiempoMax: 7,  densidad: 1.04, presionEspecifica: 500, calorEspecifico: 0.30, conductividadTermica: 4.60e-4, tempResina: 300, tempMolde: 80, tempDistorsion: 135 },
+  { material: "ABS-PC",         tiempoMax: 6,  densidad: 1.10, presionEspecifica: 500, calorEspecifico: 0.35, conductividadTermica: 5.40e-4, tempResina: 260, tempMolde: 75, tempDistorsion: 110 },
+  { material: "PMMA",           tiempoMax: 8,  densidad: 1.19, presionEspecifica: 500, calorEspecifico: 0.35, conductividadTermica: 5.00e-4, tempResina: 225, tempMolde: 80, tempDistorsion: 105 },
+  { material: "PBT",            tiempoMax: 2,  densidad: 1.07, presionEspecifica: 450, calorEspecifico: 0.30, conductividadTermica: 6.50e-4, tempResina: 240, tempMolde: 80, tempDistorsion: 80 },
+  { material: "PS",             tiempoMax: 5,  densidad: 0.92, presionEspecifica: 350, calorEspecifico: 0.35, conductividadTermica: 2.00e-4, tempResina: 230, tempMolde: 30, tempDistorsion: 99 },
+  { material: "PP",             tiempoMax: 25, densidad: 0.73, presionEspecifica: 300, calorEspecifico: 0.46, conductividadTermica: 3.00e-4, tempResina: 190, tempMolde: 30, tempDistorsion: 56 },
+  { material: "TPE",            tiempoMax: 15, densidad: 0.70, presionEspecifica: 250, calorEspecifico: 0.45, conductividadTermica: 2.50e-4, tempResina: 200, tempMolde: 30, tempDistorsion: 60 },
+  { material: "PA6",            tiempoMax: 4,  densidad: 1.13, presionEspecifica: 600, calorEspecifico: 0.40, conductividadTermica: 5.85e-4, tempResina: 250, tempMolde: 80, tempDistorsion: 70 },
+  { material: "PA6 + FV 30%",   tiempoMax: 4,  densidad: 1.36, presionEspecifica: 750, calorEspecifico: 0.40, conductividadTermica: 5.85e-4, tempResina: 260, tempMolde: 80, tempDistorsion: 100 },
+  { material: "PA66",           tiempoMax: 4,  densidad: 1.14, presionEspecifica: 650, calorEspecifico: 0.40, conductividadTermica: 5.85e-4, tempResina: 280, tempMolde: 80, tempDistorsion: 85 },
+  { material: "PA66 + FV 50%",  tiempoMax: 4,  densidad: 1.57, presionEspecifica: 850, calorEspecifico: 0.40, conductividadTermica: 5.85e-4, tempResina: 285, tempMolde: 90, tempDistorsion: 110 },
+  { material: "PA12",           tiempoMax: 13, densidad: 1.01, presionEspecifica: 500, calorEspecifico: 0.40, conductividadTermica: 5.50e-4, tempResina: 240, tempMolde: 80, tempDistorsion: 55 },
 ];
 
 // Schema:
