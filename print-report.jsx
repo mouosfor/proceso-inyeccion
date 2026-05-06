@@ -4,6 +4,34 @@
 
 const { fmt, fmtPct } = window;
 
+// ─── Colores de estado ───
+const C = {
+  ok:    "#0d7a3a",
+  warn:  "#d49100",
+  high:  "#c92a2a",
+  low:   "#5560d4",
+  neutral: "#adb5bd",
+};
+const CBg = {
+  ok:    "#e7f6ec",
+  warn:  "#fff5e0",
+  high:  "#fde8e8",
+  low:   "#eef0fb",
+  neutral: "#f1f3f5",
+};
+
+function getStatusColor(status) {
+  return C[status] || "#0f172a";
+}
+
+function hasWarning(r) {
+  const utilSt = window.statusUtilizacion(r.porcentajeUtilizacion);
+  const permSt = window.statusPermanencia(r.tiempoPermanencia, r.tiempoMaxMaterial);
+  const ldSt = window.statusRatioLD(r.ratioLD);
+  const tonSt = window.statusTonelaje(r.relacionTonelaje);
+  return [utilSt, permSt, ldSt, tonSt].some(s => s === "high" || s === "warn");
+}
+
 // ─── SVG: Husillo de inyección ───
 function ScrewSVG({ width = 180, height = 50 }) {
   return (
@@ -85,6 +113,7 @@ function generateExplanation(top, s) {
   const m = top.maquina;
   const is2K = r.mode === "2K";
   const parts = [];
+  let hasWarning = false;
 
   // Utilización
   const util = r.mode === "2K"
@@ -95,9 +124,15 @@ function generateExplanation(top, s) {
   if (util >= 0.35 && util <= 0.8) {
     parts.push(`La utilización del husillo es del ${utilPct}%, dentro del rango óptimo (35-80%), lo que garantiza un aprovechamiento eficiente del material.`);
   } else if (util < 0.35) {
-    parts.push(`La utilización del husillo es del ${utilPct}%, por debajo del rango óptimo, pero suficiente para la pieza requerida.`);
+    hasWarning = true;
+    if (util < 0.2) {
+      parts.push(`⚠ La utilización del husillo es del ${utilPct}%, muy por debajo del rango óptimo (35-80%). La pieza es demasiado pequeña para el husillo de esta máquina.`);
+    } else {
+      parts.push(`⚠ La utilización del husillo es del ${utilPct}%, por debajo del rango óptimo (35-80%). Se recomienda considerar una máquina con husillo de menor diámetro.`);
+    }
   } else {
-    parts.push(`La utilización del husillo es del ${utilPct}%, cercana al límite máximo, pero dentro de lo aceptable.`);
+    hasWarning = true;
+    parts.push(`⚠ La utilización del husillo es del ${utilPct}%, por encima del rango óptimo (35-80%). Existe riesgo de degradación del material por cizalla excesiva.`);
   }
 
   // Permanencia
@@ -111,8 +146,12 @@ function generateExplanation(top, s) {
   if (perm != null && tMax != null) {
     if (perm <= tMax) {
       parts.push(`El tiempo de permanencia (${fmt(perm, 1)} min) no supera el máximo recomendado para el material (${tMax} min), asegurando la integridad del polímero.`);
+    } else if (perm <= tMax * 1.2) {
+      hasWarning = true;
+      parts.push(`⚠ El tiempo de permanencia (${fmt(perm, 1)} min) supera ligeramente el máximo recomendado (${tMax} min). Se recomienda monitorizar el proceso.`);
     } else {
-      parts.push(`El tiempo de permanencia (${fmt(perm, 1)} min) se acerca al límite máximo del material (${tMax} min). Se recomienda monitorizar el proceso.`);
+      hasWarning = true;
+      parts.push(`✖ El tiempo de permanencia (${fmt(perm, 1)} min) supera significativamente el máximo recomendado (${tMax} min). Riesgo de degradación térmica del material.`);
     }
   }
 
@@ -120,16 +159,32 @@ function generateExplanation(top, s) {
   const ld = r.mode === "2K"
     ? Math.min(r.resPrincipal?.ratioLD || 0, r.resSecundario?.ratioLD || 0)
     : r.ratioLD;
-  if (ld != null && ld >= 1 && ld <= 3) {
-    parts.push(`La relación L/D (${fmt(ld)}) está dentro del rango óptimo (1-3), garantizando una correcta plastificación y homogeneidad del fundido.`);
+  if (ld != null) {
+    if (ld >= 1 && ld <= 3) {
+      parts.push(`La relación L/D (${fmt(ld)}) está dentro del rango óptimo (1-3), garantizando una correcta plastificación y homogeneidad del fundido.`);
+    } else if (ld >= 0.5 && ld <= 4) {
+      hasWarning = true;
+      parts.push(`⚠ La relación L/D (${fmt(ld)}) está fuera del rango óptimo (1-3). La plastificación puede verse afectada.`);
+    } else {
+      hasWarning = true;
+      parts.push(`✖ La relación L/D (${fmt(ld)}) está muy fuera del rango recomendado (1-3). La calidad de plastificación puede ser deficiente.`);
+    }
   }
 
   // Tonelaje
   const tonRel = r.relacionTonelaje;
   if (tonRel != null) {
     const tonPct = (tonRel * 100).toFixed(0);
-    if (tonRel <= 1) {
+    if (tonRel > 1) {
+      hasWarning = true;
+      parts.push(`✖ La fuerza de cierre necesaria (${r.fuerzaCierreNecesaria != null ? r.fuerzaCierreNecesaria.toFixed(0) : "—"} t) supera la capacidad de la máquina (${m.tonelaje} t). ¡La máquina NO puede cerrar el molde!`);
+    } else if (tonRel > 0.9) {
+      hasWarning = true;
+      parts.push(`⚠ La fuerza de cierre necesaria (${r.fuerzaCierreNecesaria != null ? r.fuerzaCierreNecesaria.toFixed(0) : "—"} t) está muy ajustada (${tonPct}% de ${m.tonelaje} t). Riesgo de rebabas.`);
+    } else if (tonRel >= 0.5) {
       parts.push(`La fuerza de cierre necesaria (${r.fuerzaCierreNecesaria != null ? r.fuerzaCierreNecesaria.toFixed(0) : "—"} t) representa un ${tonPct}% de la capacidad de la máquina (${m.tonelaje} t), con suficiente margen de seguridad.`);
+    } else {
+      parts.push(`La fuerza de cierre necesaria (${r.fuerzaCierreNecesaria != null ? r.fuerzaCierreNecesaria.toFixed(0) : "—"} t) solo utiliza un ${tonPct}% de la capacidad de la máquina (${m.tonelaje} t). La máquina está sobredimensionada.`);
     }
   }
 
@@ -138,7 +193,7 @@ function generateExplanation(top, s) {
     parts.push(`La máquina dispone de dos husillos independientes (${m.diametroHusillo} mm y ${m.diametroHusilloSecundario} mm), permitiendo el procesamiento simultáneo de dos materiales diferentes en un mismo ciclo.`);
   }
 
-  return parts.length > 0 ? parts.join(" ") : "La máquina seleccionada cumple con los requisitos de capacidad, dimensionales y de proceso para la pieza especificada.";
+  return { text: parts.length > 0 ? parts.join(" ") : "La máquina seleccionada cumple con los requisitos de capacidad, dimensionales y de proceso para la pieza especificada.", hasWarning };
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -149,10 +204,17 @@ function PrintReport({ s, top }) {
   const r = top.res;
   const m = top.maquina;
   const is2K = r.mode === "2K";
-  const explanation = generateExplanation(top, s);
+  const { text: explanation, hasWarning: explHasWarning } = generateExplanation(top, s);
   const date = new Date().toLocaleDateString("es-ES", {
     day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit"
   });
+
+  // Status para cada métrica 1K
+  const utilSt = is2K ? null : window.statusUtilizacion(r.porcentajeUtilizacion);
+  const permSt = is2K ? null : window.statusPermanencia(r.tiempoPermanencia, r.tiempoMaxMaterial);
+  const ldSt = is2K ? null : window.statusRatioLD(r.ratioLD);
+  const tonSt = is2K ? null : window.statusTonelaje(r.relacionTonelaje);
+  const anyWarning = explHasWarning;
 
   return (
     <div id="print-report" style={{
@@ -276,15 +338,17 @@ function PrintReport({ s, top }) {
           )}
         </div>
 
-        {/* ─── RECOMMENDED MACHINE ─── */}
+        {/* ─── MÁQUINA SELECCIONADA ─── */}
         <div style={{ marginTop: 20 }}>
           <div style={{
-            background: "linear-gradient(135deg, #059669, #10b981)",
+            background: anyWarning
+              ? "linear-gradient(135deg, #d97706, #f59e0b)"
+              : "linear-gradient(135deg, #059669, #10b981)",
             borderRadius: 10, padding: "14px 18px",
             display: "flex", justifyContent: "space-between", alignItems: "center",
           }}>
             <div>
-              <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>★ Máquina recomendada</div>
+              <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>★ Máquina seleccionada</div>
               <div style={{ color: "#fff", fontSize: 16, fontWeight: 700, marginTop: 2 }}>{m.maquina}</div>
               <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 10, marginTop: 2 }}>{m.marca} · {m.ubicacion} · {m.tonelaje} t</div>
             </div>
@@ -310,51 +374,19 @@ function PrintReport({ s, top }) {
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, marginTop: 10 }}>
-              <MetricBox label="Utilización" value={fmtPct(r.porcentajeUtilizacion)} />
-              <MetricBox label="Permanencia" value={`${fmt(r.tiempoPermanencia, 1)} min`} />
-              <MetricBox label="L/D" value={fmt(r.ratioLD)} />
+              <MetricBox label="Utilización" value={fmtPct(r.porcentajeUtilizacion)} status={utilSt} />
+              <MetricBox label="Permanencia" value={`${fmt(r.tiempoPermanencia, 1)} min`} status={permSt} />
+              <MetricBox label="L/D" value={fmt(r.ratioLD)} status={ldSt} />
               <MetricBox label="Dosis real" value={`${fmt(r.cm3DosisReal)} cm³`} />
-              <MetricBox label="F.cierre" value={fmtPct(r.relacionTonelaje)} />
+              <MetricBox label="F.cierre" value={fmtPct(r.relacionTonelaje)} status={tonSt} />
             </div>
           )}
         </div>
 
-        {/* ─── REFRIGERACIÓN Y CICLO ─── */}
-        {(s.tCicloEstimado != null && s.tCicloEstimado > 0) && (
-          <div style={{ marginTop: 14, background: "#eef2ff", borderRadius: 8, padding: "10px 14px", border: "1px solid #c7d2fe" }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: "#4f46e5", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 6 }}>
-              Refrigeración y ciclo
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: is2K ? "1fr 1fr 1fr" : "1fr 1fr", gap: 10, fontSize: 10 }}>
-              {is2K ? (
-                <>
-                  <div>
-                    <div style={{ color: "#64748b" }}>t.refrig {s.materialNombre}</div>
-                    <div style={{ fontFamily: "JetBrains Mono, monospace", color: "#0f172a", fontWeight: 700, fontSize: 12 }}>{s.c1.tiempoRefrigeracion ? `${s.c1.tiempoRefrigeracion.toFixed(1)} s` : "—"}</div>
-                  </div>
-                  <div>
-                    <div style={{ color: "#64748b" }}>t.refrig {s.materialNombre2}</div>
-                    <div style={{ fontFamily: "JetBrains Mono, monospace", color: "#0f172a", fontWeight: 700, fontSize: 12 }}>{s.c2.tiempoRefrigeracion ? `${s.c2.tiempoRefrigeracion.toFixed(1)} s` : "—"}</div>
-                  </div>
-                </>
-              ) : (
-                <div>
-                  <div style={{ color: "#64748b" }}>t.refrigeración</div>
-                  <div style={{ fontFamily: "JetBrains Mono, monospace", color: "#0f172a", fontWeight: 700, fontSize: 12 }}>{s.tRefrigUsado ? `${s.tRefrigUsado.toFixed(1)} s` : "—"}</div>
-                </div>
-              )}
-              <div>
-                <div style={{ color: "#64748b" }}>ciclo estimado</div>
-                <div style={{ fontFamily: "JetBrains Mono, monospace", color: "#4f46e5", fontWeight: 700, fontSize: 12 }}>{s.tCicloEstimado.toFixed(1)} s</div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* ─── EXPLANATION ─── */}
-        <div style={{ marginTop: 16, background: "#f0fdf4", borderRadius: 8, padding: "12px 16px", border: "1px solid #bbf7d0" }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: "#059669", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 }}>
-            ¿Por qué esta máquina?
+        <div style={{ marginTop: 16, background: anyWarning ? "#fffbeb" : "#f0fdf4", borderRadius: 8, padding: "12px 16px", border: anyWarning ? "1px solid #fde68a" : "1px solid #bbf7d0" }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: anyWarning ? "#d97706" : "#059669", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 }}>
+            {anyWarning ? "⚠ Análisis de la máquina" : "¿Por qué esta máquina?"}
           </div>
           <p style={{ fontSize: 10, color: "#475569", lineHeight: 1.6, margin: 0 }}>
             {explanation}
@@ -371,11 +403,13 @@ function PrintReport({ s, top }) {
   );
 }
 
-function MetricBox({ label, value }) {
+function MetricBox({ label, value, status }) {
+  const color = status ? getStatusColor(status) : "#0f172a";
+  const bg = status ? CBg[status] : "#f8fafc";
   return (
-    <div style={{ background: "#f8fafc", borderRadius: 6, padding: "8px 10px", textAlign: "center" }}>
+    <div style={{ background: bg, borderRadius: 6, padding: "8px 10px", textAlign: "center", border: status ? `1px solid ${color}40` : "none" }}>
       <div style={{ fontSize: 8, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.3 }}>{label}</div>
-      <div style={{ fontSize: 13, fontWeight: 700, fontFamily: "JetBrains Mono, monospace", color: "#0f172a", marginTop: 2 }}>{value}</div>
+      <div style={{ fontSize: 13, fontWeight: 700, fontFamily: "JetBrains Mono, monospace", color, marginTop: 2 }}>{value}</div>
     </div>
   );
 }
@@ -383,6 +417,9 @@ function MetricBox({ label, value }) {
 // Fila compacta para un husillo en modo 2K
 function Husillo2KRow({ res, title, sub, accent }) {
   if (!res) return null;
+  const utilSt = window.statusUtilizacion(res.porcentajeUtilizacion);
+  const permSt = window.statusPermanencia(res.tiempoPermanencia, res.tiempoMaxMaterial);
+  const ldSt = window.statusRatioLD(res.ratioLD);
   return (
     <div style={{
       background: "#f8fafc", borderRadius: 8, padding: "10px 12px",
@@ -393,9 +430,9 @@ function Husillo2KRow({ res, title, sub, accent }) {
         <div style={{ fontSize: 8, color: "#94a3b8", fontFamily: "JetBrains Mono, monospace" }}>{sub}</div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
-        <MetricBox label="Utilización" value={fmtPct(res.porcentajeUtilizacion)} />
-        <MetricBox label="Permanencia" value={res.tiempoPermanencia != null ? `${fmt(res.tiempoPermanencia, 1)} min` : "—"} />
-        <MetricBox label="L/D" value={fmt(res.ratioLD)} />
+        <MetricBox label="Utilización" value={fmtPct(res.porcentajeUtilizacion)} status={utilSt} />
+        <MetricBox label="Permanencia" value={res.tiempoPermanencia != null ? `${fmt(res.tiempoPermanencia, 1)} min` : "—"} status={permSt} />
+        <MetricBox label="L/D" value={fmt(res.ratioLD)} status={ldSt} />
         <MetricBox label="Dosis real" value={res.cm3DosisReal != null ? `${fmt(res.cm3DosisReal)} cm³` : "—"} />
       </div>
     </div>

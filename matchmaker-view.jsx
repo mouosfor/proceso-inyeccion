@@ -77,7 +77,7 @@ const worstStatus = (...sts) => {
 // ═══════════════════════════════════════════════════════════════
 // MAIN
 // ═══════════════════════════════════════════════════════════════
-function MatchmakerView({ s }) {
+function MatchmakerView({ s, onSelectMachine, selectedMachineName }) {
   const [compareIds, setCompareIds] = React.useState([]);
   const kFilter = s.tipoInyeccion;
   const setKFilter = s.setTipoInyeccion;
@@ -114,6 +114,8 @@ function MatchmakerView({ s }) {
               setActiveTab={setActiveTab}
               expandedId={expandedId}
               setExpandedId={setExpandedId}
+              onSelectMachine={onSelectMachine}
+              selectedMachineName={selectedMachineName}
             />
           </>
         ) : (
@@ -503,7 +505,7 @@ function Cp({ label, value, status }) {
 // ═══════════════════════════════════════════════════════════════
 // MACHINE LIST PANEL
 // ═══════════════════════════════════════════════════════════════
-function MachineListPanel({ sorted, compareIds, toggleCompare, activeTab, setActiveTab, expandedId, setExpandedId }) {
+function MachineListPanel({ sorted, compareIds, toggleCompare, activeTab, setActiveTab, expandedId, setExpandedId, onSelectMachine, selectedMachineName }) {
   const CATS = [
     { key: "all", label: `Todas (${sorted.length})` },
     { key: "good", label: `Óptimas (${sorted.filter(x => x.score > 50).length})` },
@@ -553,7 +555,7 @@ function MachineListPanel({ sorted, compareIds, toggleCompare, activeTab, setAct
               <div
                 onClick={() => setExpandedId(isExpanded ? null : m.maquina)}
                 style={{
-                  display: "grid", gridTemplateColumns: "40px 1fr 80px 90px 70px 80px 80px",
+                  display: "grid", gridTemplateColumns: "40px 1fr 80px 90px 70px 80px 80px 90px",
                   alignItems: "center", gap: 8, padding: "9px 14px", cursor: "pointer",
                 }}
               >
@@ -575,6 +577,13 @@ function MachineListPanel({ sorted, compareIds, toggleCompare, activeTab, setAct
                   color: isCompared ? "#fff" : "#475569",
                   transition: "all .15s ease",
                 }}>{isCompared ? "QUITAR" : "COMPARAR"}</button>
+                <button onClick={e => { e.stopPropagation(); onSelectMachine(item); }} style={{
+                  padding: "4px 10px", borderRadius: 6, border: "none",
+                  fontSize: 10, fontWeight: 700, cursor: "pointer",
+                  background: selectedMachineName === m.maquina ? "#059669" : "#eef2ff",
+                  color: selectedMachineName === m.maquina ? "#fff" : "#6366f1",
+                  transition: "all .15s ease",
+                }}>{selectedMachineName === m.maquina ? "✓ SELEC." : "SELECCIONAR"}</button>
               </div>
 
               {/* Expanded details */}

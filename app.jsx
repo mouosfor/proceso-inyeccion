@@ -1,6 +1,7 @@
 function App() {
   const [tab, setTab] = React.useState("dashboard"); // dashboard | plano | maquina
   const s = window.useProcesoState();
+  const [selectedMachineName, setSelectedMachineName] = React.useState(null);
 
   // Compute recommended machine for print
   const kFilter = s.tipoInyeccion;
@@ -20,6 +21,9 @@ function App() {
     })
     .sort((a, b) => b.score - a.score);
   const top = filteredResults[0];
+  const selectedItem = selectedMachineName
+    ? filteredResults.find(item => item.maquina.maquina === selectedMachineName) || top
+    : top;
 
   const onApplyExtracted = (data) => {
     if (data.material && window.MATERIALES.find(m => m.material === data.material)) {
@@ -73,13 +77,13 @@ function App() {
       <main style={{ flex: 1, background: tab === "dashboard" ? "#f8fafc" : "transparent" }} className="no-print">
         {tab === "dashboard" && <window.DashboardHome onGoToMaquina={() => setTab("maquina")} />}
         {tab === "plano" && <window.PlanoTab onApply={onApplyExtracted} onGoToMaquina={() => setTab("maquina")} />}
-        {tab === "maquina" && <window.MatchmakerView s={s} />}
+        {tab === "maquina" && <window.MatchmakerView s={s} onSelectMachine={(item) => setSelectedMachineName(item.maquina.maquina)} selectedMachineName={selectedMachineName} />}
       </main>
 
       {/* Print-only report */}
       <div id="print-report-container" style={{ display: "none" }}>
-        {top && top.res.valid && top.res.valid !== false && s.pesoInyectadaN > 0 && (
-          <window.PrintReport s={s} top={top} />
+        {selectedItem && selectedItem.res.valid && selectedItem.res.valid !== false && s.pesoInyectadaN > 0 && (
+          <window.PrintReport s={s} top={selectedItem} />
         )}
       </div>
     </div>
