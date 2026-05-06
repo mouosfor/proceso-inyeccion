@@ -225,13 +225,13 @@ function PrintReport({ s, top }) {
         <style>{`
         @media print {
           body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          @page { size: A4; margin: 8mm 12mm; }
+          @page { size: A4; margin: 0; }
           #print-report { page-break-inside: avoid; }
         }
-        .print-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 24px; border-bottom: 2px solid #059669; }
-        .print-body { padding: 16px 26px; }
-        .print-footer { padding: 8px 24px; border-top: 1px solid #e2e8f0; font-size: 9px; color: #94a3b8; text-align: center; }
-        .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0 0; }
+        .print-header { display: flex; align-items: center; justify-content: space-between; padding: 6mm 12mm 8px; border-bottom: 2px solid #059669; }
+        .print-body { padding: 10px 12mm; }
+        .print-footer { padding: 6px 12mm 5mm; border-top: 1px solid #e2e8f0; font-size: 9px; color: #94a3b8; text-align: center; }
+        .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0 0; }
         .info-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px; }
         .info-label { font-size: 9px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; }
         .info-value { font-size: 12px; font-weight: 700; color: #0f172a; margin-top: 2px; }
@@ -277,8 +277,8 @@ function PrintReport({ s, top }) {
         </div>
 
         {/* ── Material & Weight ── */}
-        <div style={{ marginTop: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 }}>
             Datos de la pieza
           </div>
 
@@ -341,12 +341,12 @@ function PrintReport({ s, top }) {
         </div>
 
         {/* ─── ESQUEMA MÁQUINA INYECCIÓN ─── */}
-        <div style={{ marginTop: 16, background: "#f8fafc", borderRadius: 8, padding: 8, border: "1px solid #eef2f6" }}>
+        <div style={{ marginTop: 12, background: "#f8fafc", borderRadius: 8, padding: 6, border: "1px solid #eef2f6" }}>
           <img src="Image_01.png" alt="Esquema de máquina de inyección" className="scheme-img" />
         </div>
 
         {/* ─── MÁQUINA SELECCIONADA ─── */}
-        <div style={{ marginTop: 16 }}>
+        <div style={{ marginTop: 12 }}>
           <div style={{
             background: anyWarning
               ? "linear-gradient(135deg, #d97706, #f59e0b)"
@@ -391,7 +391,7 @@ function PrintReport({ s, top }) {
         </div>
 
         {/* ─── EXPLANATION ─── */}
-        <div style={{ marginTop: 16, background: anyWarning ? "#fffbeb" : "#f0fdf4", borderRadius: 8, padding: "12px 16px", border: anyWarning ? "1px solid #fde68a" : "1px solid #bbf7d0" }}>
+        <div style={{ marginTop: 12, background: anyWarning ? "#fffbeb" : "#f0fdf4", borderRadius: 8, padding: "10px 14px", border: anyWarning ? "1px solid #fde68a" : "1px solid #bbf7d0" }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: anyWarning ? "#d97706" : "#059669", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 6 }}>
             {anyWarning ? "⚠ Análisis de la máquina" : "¿Por qué esta máquina?"}
           </div>
