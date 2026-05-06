@@ -395,7 +395,7 @@ function PrintReport({ s, top }) {
           <div style={{ fontSize: 10, fontWeight: 700, color: anyWarning ? "#d97706" : "#059669", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 6 }}>
             {anyWarning ? "⚠ Análisis de la máquina" : "¿Por qué esta máquina?"}
           </div>
-          <p style={{ fontSize: 12, color: "#334155", lineHeight: 1.55, margin: 0 }}>
+          <p style={{ fontSize: 11, color: "#334155", lineHeight: 1.55, margin: 0 }}>
             {explanation}
           </p>
         </div>
