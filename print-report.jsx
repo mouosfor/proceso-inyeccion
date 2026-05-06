@@ -225,30 +225,32 @@ function PrintReport({ s, top }) {
         <style>{`
         @media print {
           body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          @page { margin: 15mm; }
+          @page { size: A4; margin: 8mm 12mm; }
+          #print-report { page-break-inside: avoid; }
         }
-        .print-header { display: flex; align-items: center; justify-content: space-between; padding: 24px 32px; border-bottom: 2px solid #059669; }
-        .print-body { padding: 24px 32px; }
-        .print-footer { padding: 16px 32px; border-top: 1px solid #e2e8f0; font-size: 9px; color: #94a3b8; text-align: center; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
-        .info-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; }
-        .info-label { font-size: 9px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-        .info-value { font-size: 14px; font-weight: 700; color: #0f172a; margin-top: 2px; }
-        .machine-title { font-size: 18px; font-weight: 700; color: #059669; }
+        .print-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 24px; border-bottom: 2px solid #059669; }
+        .print-body { padding: 12px 24px; }
+        .print-footer { padding: 6px 24px; border-top: 1px solid #e2e8f0; font-size: 8px; color: #94a3b8; text-align: center; }
+        .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 8px 0 0; }
+        .info-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px 8px; }
+        .info-label { font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; }
+        .info-value { font-size: 11px; font-weight: 700; color: #0f172a; margin-top: 1px; }
+        .machine-title { font-size: 16px; font-weight: 700; color: #059669; }
+        .scheme-img { width: 100%; max-height: 90px; object-fit: contain; display: block; }
       `}</style>
 
       {/* ═══ HEADER ═══ */}
       <div className="print-header">
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <img src="logo.png" alt="WalterPack" style={{ height: 32, width: "auto" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img src="logo.png" alt="WalterPack" style={{ height: 26, width: "auto" }} />
           <div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>Proceso Inyección</div>
-            <div style={{ fontSize: 10, color: "#64748b" }}>Cumplimiento de máquina</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", lineHeight: 1.1 }}>Proceso Inyección</div>
+            <div style={{ fontSize: 9, color: "#64748b" }}>Cumplimiento de máquina</div>
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 9, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5 }}>Informe técnico</div>
-          <div style={{ fontSize: 9, color: "#94a3b8", marginTop: 2 }}>{date}</div>
+          <div style={{ fontSize: 8, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5 }}>Informe técnico</div>
+          <div style={{ fontSize: 8, color: "#94a3b8", marginTop: 1 }}>{date}</div>
         </div>
       </div>
 
@@ -275,105 +277,81 @@ function PrintReport({ s, top }) {
         </div>
 
         {/* ── Material & Weight ── */}
-        <div style={{ marginTop: 20 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>
+        <div style={{ marginTop: 10 }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 5 }}>
             Datos de la pieza
           </div>
 
           {is2K ? (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
               {/* Componente 1 */}
-              <div style={{ border: "1px solid #e0e7ff", borderRadius: 8, padding: "12px 14px", borderLeft: "3px solid #6366f1" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", marginBottom: 6 }}>Componente 1</div>
-                <div style={{ marginBottom: 4 }}>
-                  <span style={{ fontSize: 9, color: "#64748b" }}>Material: </span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a" }}>{s.materialNombre}</span>
-                </div>
-                <div>
-                  <span style={{ fontSize: 9, color: "#64748b" }}>Peso: </span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{s.c1.pesoInyectadaN ? `${s.c1.pesoInyectadaN.toFixed(2)} g` : "—"}</span>
-                </div>
-                <div style={{ marginTop: 4 }}>
-                  <span style={{ fontSize: 9, color: "#64748b" }}>Volumen: </span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{s.c1.volumenN ? `${s.c1.volumenN.toFixed(2)} cm³` : "—"}</span>
-                </div>
+              <div style={{ border: "1px solid #e0e7ff", borderRadius: 6, padding: "6px 10px", borderLeft: "3px solid #6366f1", display: "flex", flexDirection: "column", gap: 2 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: "#6366f1", textTransform: "uppercase" }}>Componente 1</div>
+                <div style={{ fontSize: 10 }}><span style={{ color: "#64748b" }}>Mat:</span> <b>{s.materialNombre}</b></div>
+                <div style={{ fontSize: 10, fontFamily: "JetBrains Mono, monospace" }}><span style={{ color: "#64748b" }}>Vol:</span> <b>{s.c1.volumenN ? `${s.c1.volumenN.toFixed(1)} cm³` : "—"}</b> <span style={{ color: "#94a3b8" }}>·</span> <span style={{ color: "#64748b" }}>Peso:</span> <b>{s.c1.pesoInyectadaN ? `${s.c1.pesoInyectadaN.toFixed(1)} g` : "—"}</b></div>
               </div>
               {/* Componente 2 */}
-              <div style={{ border: "1px solid #d1fae5", borderRadius: 8, padding: "12px 14px", borderLeft: "3px solid #059669" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#059669", textTransform: "uppercase", marginBottom: 6 }}>Componente 2</div>
-                <div style={{ marginBottom: 4 }}>
-                  <span style={{ fontSize: 9, color: "#64748b" }}>Material: </span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a" }}>{s.materialNombre2}</span>
-                </div>
-                <div>
-                  <span style={{ fontSize: 9, color: "#64748b" }}>Peso: </span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{s.c2.pesoInyectadaN ? `${s.c2.pesoInyectadaN.toFixed(2)} g` : "—"}</span>
-                </div>
-                <div style={{ marginTop: 4 }}>
-                  <span style={{ fontSize: 9, color: "#64748b" }}>Volumen: </span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{s.c2.volumenN ? `${s.c2.volumenN.toFixed(2)} cm³` : "—"}</span>
-                </div>
+              <div style={{ border: "1px solid #d1fae5", borderRadius: 6, padding: "6px 10px", borderLeft: "3px solid #059669", display: "flex", flexDirection: "column", gap: 2 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: "#059669", textTransform: "uppercase" }}>Componente 2</div>
+                <div style={{ fontSize: 10 }}><span style={{ color: "#64748b" }}>Mat:</span> <b>{s.materialNombre2}</b></div>
+                <div style={{ fontSize: 10, fontFamily: "JetBrains Mono, monospace" }}><span style={{ color: "#64748b" }}>Vol:</span> <b>{s.c2.volumenN ? `${s.c2.volumenN.toFixed(1)} cm³` : "—"}</b> <span style={{ color: "#94a3b8" }}>·</span> <span style={{ color: "#64748b" }}>Peso:</span> <b>{s.c2.pesoInyectadaN ? `${s.c2.pesoInyectadaN.toFixed(1)} g` : "—"}</b></div>
               </div>
               {/* Combined */}
-              <div style={{ gridColumn: "1 / -1", background: "#f8fafc", borderRadius: 8, padding: "10px 14px", display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 10, color: "#475569" }}>Peso total inyectado</span>
-                <span style={{ fontSize: 14, fontWeight: 700, fontFamily: "JetBrains Mono, monospace", color: "#0f172a" }}>{s.pesoInyectadaN ? `${s.pesoInyectadaN.toFixed(2)} g` : "—"}</span>
+              <div style={{ gridColumn: "1 / -1", background: "#f8fafc", borderRadius: 6, padding: "5px 10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 9, color: "#475569" }}>Peso total inyectado</span>
+                <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "JetBrains Mono, monospace", color: "#0f172a" }}>{s.pesoInyectadaN ? `${s.pesoInyectadaN.toFixed(2)} g` : "—"}</span>
               </div>
             </div>
           ) : (
-            <div style={{ border: "1px solid #e0e7ff", borderRadius: 8, padding: "12px 14px", borderLeft: "3px solid #6366f1" }}>
-              <div style={{ marginBottom: 4 }}>
-                <span style={{ fontSize: 9, color: "#64748b" }}>Material: </span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a" }}>{s.materialNombre}</span>
-              </div>
-              <div style={{ marginBottom: 4 }}>
-                <span style={{ fontSize: 9, color: "#64748b" }}>Peso inyectada: </span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{s.c1.pesoInyectadaN ? `${s.c1.pesoInyectadaN.toFixed(2)} g` : "—"}</span>
-              </div>
-              <div>
-                <span style={{ fontSize: 9, color: "#64748b" }}>Volumen: </span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{s.c1.volumenN ? `${s.c1.volumenN.toFixed(2)} cm³` : "—"}</span>
-              </div>
+            <div style={{ border: "1px solid #e0e7ff", borderRadius: 6, padding: "6px 10px", borderLeft: "3px solid #6366f1", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <div style={{ fontSize: 10 }}><span style={{ color: "#64748b" }}>Material:</span> <b>{s.materialNombre}</b></div>
+              <div style={{ fontSize: 10, fontFamily: "JetBrains Mono, monospace" }}><span style={{ color: "#64748b" }}>Volumen:</span> <b>{s.c1.volumenN ? `${s.c1.volumenN.toFixed(2)} cm³` : "—"}</b></div>
+              <div style={{ fontSize: 10, fontFamily: "JetBrains Mono, monospace" }}><span style={{ color: "#64748b" }}>Peso inyectada:</span> <b>{s.c1.pesoInyectadaN ? `${s.c1.pesoInyectadaN.toFixed(2)} g` : "—"}</b></div>
             </div>
           )}
         </div>
 
+        {/* ─── ESQUEMA MÁQUINA INYECCIÓN ─── */}
+        <div style={{ marginTop: 10, background: "#f8fafc", borderRadius: 6, padding: 6, border: "1px solid #eef2f6" }}>
+          <img src="Image_01.png" alt="Esquema de máquina de inyección" className="scheme-img" />
+        </div>
+
         {/* ─── MÁQUINA SELECCIONADA ─── */}
-        <div style={{ marginTop: 20 }}>
+        <div style={{ marginTop: 8 }}>
           <div style={{
             background: anyWarning
               ? "linear-gradient(135deg, #d97706, #f59e0b)"
               : "linear-gradient(135deg, #059669, #10b981)",
-            borderRadius: 10, padding: "14px 18px",
+            borderRadius: 8, padding: "8px 14px",
             display: "flex", justifyContent: "space-between", alignItems: "center",
           }}>
             <div>
-              <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>★ Máquina seleccionada</div>
-              <div style={{ color: "#fff", fontSize: 16, fontWeight: 700, marginTop: 2 }}>{m.maquina}</div>
-              <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 10, marginTop: 2 }}>{m.marca} · {m.ubicacion} · {m.tonelaje} t</div>
+              <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 8, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>★ Máquina seleccionada</div>
+              <div style={{ color: "#fff", fontSize: 14, fontWeight: 700, marginTop: 1 }}>{m.maquina}</div>
+              <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 9, marginTop: 1 }}>{m.marca} · {m.ubicacion} · {m.tonelaje} t</div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 9 }}>Tonelaje</div>
-              <div style={{ color: "#fff", fontSize: 26, fontWeight: 800, fontFamily: "JetBrains Mono, monospace" }}>{m.tonelaje}<span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>t</span></div>
+              <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 8 }}>Tonelaje</div>
+              <div style={{ color: "#fff", fontSize: 22, fontWeight: 800, fontFamily: "JetBrains Mono, monospace", lineHeight: 1 }}>{m.tonelaje}<span style={{ fontSize: 10, color: "rgba(255,255,255,0.7)" }}>t</span></div>
             </div>
           </div>
 
           {/* Key metrics: 1K → directos · 2K → P/S por husillo */}
           {is2K ? (
-            <div style={{ marginTop: 10 }}>
+            <div style={{ marginTop: 6 }}>
               <Husillo2KRow res={r.resPrincipal} title={`Husillo principal · Ø${m.diametroHusillo}`} sub={`carrera máx ${m.dosisMaxHusillo} mm`} accent="#059669" />
-              <div style={{ height: 6 }} />
+              <div style={{ height: 4 }} />
               <Husillo2KRow res={r.resSecundario} title={`Husillo secundario · Ø${m.diametroHusilloSecundario}`} sub={`carrera máx ${m.dosisMaxHusilloSecundario} mm`} accent="#0891b2" />
-              <div style={{ marginTop: 8, padding: "8px 12px", background: "#f0fdf4", borderRadius: 8, border: "1px solid #bbf7d0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#059669", textTransform: "uppercase" }}>F. cierre / Tonelaje · combinada</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>
+              <div style={{ marginTop: 5, padding: "5px 10px", background: "#f0fdf4", borderRadius: 6, border: "1px solid #bbf7d0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: "#059669", textTransform: "uppercase" }}>F. cierre / Tonelaje · combinada</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>
                   {r.fuerzaCierreNecesaria != null ? r.fuerzaCierreNecesaria.toFixed(0) : "—"} t / {m.tonelaje} t
-                  <span style={{ marginLeft: 6, color: "#059669" }}>({fmtPct(r.relacionTonelaje)})</span>
+                  <span style={{ marginLeft: 5, color: "#059669" }}>({fmtPct(r.relacionTonelaje)})</span>
                 </div>
               </div>
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, marginTop: 10 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 5, marginTop: 6 }}>
               <MetricBox label="Utilización" value={fmtPct(r.porcentajeUtilizacion)} status={utilSt} />
               <MetricBox label="Permanencia" value={`${fmt(r.tiempoPermanencia, 1)} min`} status={permSt} />
               <MetricBox label="L/D" value={fmt(r.ratioLD)} status={ldSt} />
@@ -384,11 +362,11 @@ function PrintReport({ s, top }) {
         </div>
 
         {/* ─── EXPLANATION ─── */}
-        <div style={{ marginTop: 16, background: anyWarning ? "#fffbeb" : "#f0fdf4", borderRadius: 8, padding: "12px 16px", border: anyWarning ? "1px solid #fde68a" : "1px solid #bbf7d0" }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: anyWarning ? "#d97706" : "#059669", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 }}>
+        <div style={{ marginTop: 8, background: anyWarning ? "#fffbeb" : "#f0fdf4", borderRadius: 6, padding: "6px 10px", border: anyWarning ? "1px solid #fde68a" : "1px solid #bbf7d0" }}>
+          <div style={{ fontSize: 8, fontWeight: 700, color: anyWarning ? "#d97706" : "#059669", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 3 }}>
             {anyWarning ? "⚠ Análisis de la máquina" : "¿Por qué esta máquina?"}
           </div>
-          <p style={{ fontSize: 10, color: "#475569", lineHeight: 1.6, margin: 0 }}>
+          <p style={{ fontSize: 9, color: "#475569", lineHeight: 1.4, margin: 0 }}>
             {explanation}
           </p>
         </div>
@@ -397,7 +375,6 @@ function PrintReport({ s, top }) {
       {/* ═══ FOOTER ═══ */}
       <div className="print-footer">
         <div>WalterPack Group — Proceso Inyección · Informe generado el {date}</div>
-        <div style={{ marginTop: 4 }}>Este informe es una recomendación técnica basada en los parámetros introducidos.</div>
       </div>
     </div>
   );
@@ -407,9 +384,9 @@ function MetricBox({ label, value, status }) {
   const color = status ? getStatusColor(status) : "#0f172a";
   const bg = status ? CBg[status] : "#f8fafc";
   return (
-    <div style={{ background: bg, borderRadius: 6, padding: "8px 10px", textAlign: "center", border: status ? `1px solid ${color}40` : "none" }}>
-      <div style={{ fontSize: 8, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.3 }}>{label}</div>
-      <div style={{ fontSize: 13, fontWeight: 700, fontFamily: "JetBrains Mono, monospace", color, marginTop: 2 }}>{value}</div>
+    <div style={{ background: bg, borderRadius: 5, padding: "5px 7px", textAlign: "center", border: status ? `1px solid ${color}40` : "none" }}>
+      <div style={{ fontSize: 7, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.3 }}>{label}</div>
+      <div style={{ fontSize: 11, fontWeight: 700, fontFamily: "JetBrains Mono, monospace", color, marginTop: 1 }}>{value}</div>
     </div>
   );
 }
@@ -422,14 +399,14 @@ function Husillo2KRow({ res, title, sub, accent }) {
   const ldSt = window.statusRatioLD(res.ratioLD);
   return (
     <div style={{
-      background: "#f8fafc", borderRadius: 8, padding: "10px 12px",
+      background: "#f8fafc", borderRadius: 6, padding: "5px 8px",
       borderLeft: `3px solid ${accent}`,
     }}>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 6 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: 0.6 }}>{title}</div>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 3 }}>
+        <div style={{ fontSize: 9, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: 0.5 }}>{title}</div>
         <div style={{ fontSize: 8, color: "#94a3b8", fontFamily: "JetBrains Mono, monospace" }}>{sub}</div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4 }}>
         <MetricBox label="Utilización" value={fmtPct(res.porcentajeUtilizacion)} status={utilSt} />
         <MetricBox label="Permanencia" value={res.tiempoPermanencia != null ? `${fmt(res.tiempoPermanencia, 1)} min` : "—"} status={permSt} />
         <MetricBox label="L/D" value={fmt(res.ratioLD)} status={ldSt} />
