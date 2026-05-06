@@ -236,7 +236,7 @@ function PrintReport({ s, top }) {
         .info-label { font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; }
         .info-value { font-size: 11px; font-weight: 700; color: #0f172a; margin-top: 1px; }
         .machine-title { font-size: 16px; font-weight: 700; color: #059669; }
-        .scheme-img { width: 100%; max-height: 90px; object-fit: contain; display: block; }
+        .scheme-img { width: 100%; max-height: 130px; object-fit: contain; display: block; }
       `}</style>
 
       {/* ═══ HEADER ═══ */}
@@ -277,36 +277,65 @@ function PrintReport({ s, top }) {
         </div>
 
         {/* ── Material & Weight ── */}
-        <div style={{ marginTop: 10 }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 5 }}>
+        <div style={{ marginTop: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
             Datos de la pieza
           </div>
 
           {is2K ? (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               {/* Componente 1 */}
-              <div style={{ border: "1px solid #e0e7ff", borderRadius: 6, padding: "6px 10px", borderLeft: "3px solid #6366f1", display: "flex", flexDirection: "column", gap: 2 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: "#6366f1", textTransform: "uppercase" }}>Componente 1</div>
-                <div style={{ fontSize: 10 }}><span style={{ color: "#64748b" }}>Mat:</span> <b>{s.materialNombre}</b></div>
-                <div style={{ fontSize: 10, fontFamily: "JetBrains Mono, monospace" }}><span style={{ color: "#64748b" }}>Vol:</span> <b>{s.c1.volumenN ? `${s.c1.volumenN.toFixed(1)} cm³` : "—"}</b> <span style={{ color: "#94a3b8" }}>·</span> <span style={{ color: "#64748b" }}>Peso:</span> <b>{s.c1.pesoInyectadaN ? `${s.c1.pesoInyectadaN.toFixed(1)} g` : "—"}</b></div>
+              <div style={{ border: "1px solid #e0e7ff", borderRadius: 8, padding: "10px 14px", borderLeft: "3px solid #6366f1" }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", marginBottom: 6 }}>Componente 1</div>
+                <div style={{ marginBottom: 4 }}>
+                  <span style={{ fontSize: 9, color: "#64748b" }}>Material: </span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a" }}>{s.materialNombre}</span>
+                </div>
+                <div style={{ marginBottom: 4 }}>
+                  <span style={{ fontSize: 9, color: "#64748b" }}>Peso: </span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{s.c1.pesoInyectadaN ? `${s.c1.pesoInyectadaN.toFixed(2)} g` : "—"}</span>
+                </div>
+                <div>
+                  <span style={{ fontSize: 9, color: "#64748b" }}>Volumen: </span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{s.c1.volumenN ? `${s.c1.volumenN.toFixed(2)} cm³` : "—"}</span>
+                </div>
               </div>
               {/* Componente 2 */}
-              <div style={{ border: "1px solid #d1fae5", borderRadius: 6, padding: "6px 10px", borderLeft: "3px solid #059669", display: "flex", flexDirection: "column", gap: 2 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: "#059669", textTransform: "uppercase" }}>Componente 2</div>
-                <div style={{ fontSize: 10 }}><span style={{ color: "#64748b" }}>Mat:</span> <b>{s.materialNombre2}</b></div>
-                <div style={{ fontSize: 10, fontFamily: "JetBrains Mono, monospace" }}><span style={{ color: "#64748b" }}>Vol:</span> <b>{s.c2.volumenN ? `${s.c2.volumenN.toFixed(1)} cm³` : "—"}</b> <span style={{ color: "#94a3b8" }}>·</span> <span style={{ color: "#64748b" }}>Peso:</span> <b>{s.c2.pesoInyectadaN ? `${s.c2.pesoInyectadaN.toFixed(1)} g` : "—"}</b></div>
+              <div style={{ border: "1px solid #d1fae5", borderRadius: 8, padding: "10px 14px", borderLeft: "3px solid #059669" }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#059669", textTransform: "uppercase", marginBottom: 6 }}>Componente 2</div>
+                <div style={{ marginBottom: 4 }}>
+                  <span style={{ fontSize: 9, color: "#64748b" }}>Material: </span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a" }}>{s.materialNombre2}</span>
+                </div>
+                <div style={{ marginBottom: 4 }}>
+                  <span style={{ fontSize: 9, color: "#64748b" }}>Peso: </span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{s.c2.pesoInyectadaN ? `${s.c2.pesoInyectadaN.toFixed(2)} g` : "—"}</span>
+                </div>
+                <div>
+                  <span style={{ fontSize: 9, color: "#64748b" }}>Volumen: </span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{s.c2.volumenN ? `${s.c2.volumenN.toFixed(2)} cm³` : "—"}</span>
+                </div>
               </div>
               {/* Combined */}
-              <div style={{ gridColumn: "1 / -1", background: "#f8fafc", borderRadius: 6, padding: "5px 10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 9, color: "#475569" }}>Peso total inyectado</span>
-                <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "JetBrains Mono, monospace", color: "#0f172a" }}>{s.pesoInyectadaN ? `${s.pesoInyectadaN.toFixed(2)} g` : "—"}</span>
+              <div style={{ gridColumn: "1 / -1", background: "#f8fafc", borderRadius: 8, padding: "8px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 10, color: "#475569" }}>Peso total inyectado</span>
+                <span style={{ fontSize: 14, fontWeight: 700, fontFamily: "JetBrains Mono, monospace", color: "#0f172a" }}>{s.pesoInyectadaN ? `${s.pesoInyectadaN.toFixed(2)} g` : "—"}</span>
               </div>
             </div>
           ) : (
-            <div style={{ border: "1px solid #e0e7ff", borderRadius: 6, padding: "6px 10px", borderLeft: "3px solid #6366f1", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-              <div style={{ fontSize: 10 }}><span style={{ color: "#64748b" }}>Material:</span> <b>{s.materialNombre}</b></div>
-              <div style={{ fontSize: 10, fontFamily: "JetBrains Mono, monospace" }}><span style={{ color: "#64748b" }}>Volumen:</span> <b>{s.c1.volumenN ? `${s.c1.volumenN.toFixed(2)} cm³` : "—"}</b></div>
-              <div style={{ fontSize: 10, fontFamily: "JetBrains Mono, monospace" }}><span style={{ color: "#64748b" }}>Peso inyectada:</span> <b>{s.c1.pesoInyectadaN ? `${s.c1.pesoInyectadaN.toFixed(2)} g` : "—"}</b></div>
+            <div style={{ border: "1px solid #e0e7ff", borderRadius: 8, padding: "10px 14px", borderLeft: "3px solid #6366f1" }}>
+              <div style={{ marginBottom: 4 }}>
+                <span style={{ fontSize: 9, color: "#64748b" }}>Material: </span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a" }}>{s.materialNombre}</span>
+              </div>
+              <div style={{ marginBottom: 4 }}>
+                <span style={{ fontSize: 9, color: "#64748b" }}>Peso inyectada: </span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{s.c1.pesoInyectadaN ? `${s.c1.pesoInyectadaN.toFixed(2)} g` : "—"}</span>
+              </div>
+              <div>
+                <span style={{ fontSize: 9, color: "#64748b" }}>Volumen: </span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{s.c1.volumenN ? `${s.c1.volumenN.toFixed(2)} cm³` : "—"}</span>
+              </div>
             </div>
           )}
         </div>
