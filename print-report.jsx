@@ -242,7 +242,7 @@ function PrintReport({ s, top }) {
       {/* ═══ HEADER ═══ */}
       <div className="print-header">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <img src="logo.png" alt="WalterPack" style={{ height: 26, width: "auto" }} />
+          <img src="logo.png?v=wp1" alt="Walter Pack" style={{ height: 30, width: "auto" }} />
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", lineHeight: 1.1 }}>Proceso Inyección</div>
             <div style={{ fontSize: 9, color: "#64748b" }}>Cumplimiento de máquina</div>

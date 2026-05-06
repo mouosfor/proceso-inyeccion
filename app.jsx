@@ -61,7 +61,7 @@ function App() {
         height: 56, position: "sticky", top: 0, zIndex: 10,
       }} className="no-print">
           <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }} onClick={() => setTab("dashboard")}>
-            <img src="logo.png" alt="WalterPack" style={{ height: 30, width: "auto", borderRadius: 6 }} />
+            <img src="logo.png?v=wp1" alt="Walter Pack" style={{ height: 34, width: "auto" }} />
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", lineHeight: 1.1 }}>Proceso Inyección</div>
               <div style={{ fontSize: 10, color: "#64748b" }}>Cumplimiento de máquina</div>
